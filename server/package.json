@@ -46,8 +46,8 @@
     "typeorm-naming-strategies": "^4.1.0"
   },
   "devDependencies": {
-    "@nestjs/cli": "^9.2.0",
-    "@nestjs/schematics": "^9.0.4",
+    "@nestjs/cli": "^9.3.0",
+    "@nestjs/schematics": "^9.1.0",
     "@nestjs/testing": "^9.3.3",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",

@@ -12,7 +12,9 @@ import { AppService } from './app.service';
 import { JwtAuthGuard } from './auth/auth.jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { RequestLogger } from './common/middlewares/request-logger.middleware';
+import { CovidLogModule } from './covid-log/covid-log.module';
 import { UserModule } from './user/user.module';
+import { DataImportService } from './common/services/data-import.service';
 
 @Module({
   imports: [
@@ -31,6 +33,7 @@ import { UserModule } from './user/user.module';
     UserModule,
     AuthModule,
     RequestContextModule,
+    CovidLogModule,
   ],
   controllers: [AppController],
   providers: [
@@ -44,6 +47,7 @@ import { UserModule } from './user/user.module';
       useClass: ClassSerializerInterceptor,
     },
     RequestLogger,
+    DataImportService,
   ],
 })
 export class AppModule implements NestModule {
