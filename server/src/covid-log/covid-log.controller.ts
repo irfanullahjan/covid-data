@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiQuery } from '@nestjs/swagger';
 import { CovidLogService } from './covid-log.service';
 
 @Controller('covid-log')
@@ -12,14 +12,11 @@ export class CovidLogController {
     type: 'string',
     enum: ['continent', 'location'],
   })
-  @ApiQuery({ name: 'regions', type: 'string', isArray: true })
+  @ApiQuery({ name: 'region', type: 'string' })
   @ApiQuery({ name: 'field', type: 'string' })
   async getSeries(@Query() query) {
-    return this.covidLogService.getTimeSeries({
-      regionType: query.regionType,
-      regions: query.regions.split(','),
-      field: query.field,
-    });
+    const { regionType, region, field } = query;
+    return this.covidLogService.getTimeSeries(regionType, region, field);
   }
 
   @Get('/fields')

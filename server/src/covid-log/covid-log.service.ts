@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { fields } from '../common/fieds';
+import { fieldsConfig } from '../common/fields';
 import { CreateCovidLogDto } from './dto/create-covid-log.dto';
 import { CovidLog } from './entities/covid-log.entity';
 
@@ -12,29 +12,25 @@ export class CovidLogService {
     private readonly covidLogRepository: Repository<CovidLog>,
   ) {}
 
-  async getTimeSeries({
-    regionType,
-    regions,
-    field,
-  }: {
-    regionType: string;
-    regions: string[];
-    field: string;
-  }) {
+  async getTimeSeries(regionType: string, region: string, field: string) {
     try {
-      const dateSelect = "TO_CHAR(date, 'YYYY-MM-DD') AS date";
-      const aggregationFunction = fields[field]?.aggregate;
+      const aggregationFunction = fieldsConfig[field]?.aggregate;
       if (!aggregationFunction) {
         throw new BadRequestException(`Invalid field ${field}`);
       }
+      const dateSelect = "TO_CHAR(date, 'YYYY-MM-DD') AS date";
       let qb = this.covidLogRepository
         .createQueryBuilder()
         .select([dateSelect, regionType, field])
-        .where(`${regionType} IN (:...regions)`, { regions })
+        .where(`${regionType} = :region`, { region })
         .orderBy(`date, ${regionType}`);
       if (regionType === 'continent') {
         qb = qb
-          .select([dateSelect, 'continent', `SUM(${field}) AS ${field}`])
+          .select([
+            dateSelect,
+            'continent',
+            `${aggregationFunction}(${field}) AS ${field}`,
+          ])
           .groupBy('date, continent');
       }
       const data = await qb.getRawMany();
@@ -64,8 +60,8 @@ export class CovidLogService {
   }
 
   async getFields() {
-    return Object.keys(fields).map((key) => ({
-      name: fields[key].name,
+    return Object.keys(fieldsConfig).map((key) => ({
+      name: fieldsConfig[key].name,
       value: key,
     }));
   }
