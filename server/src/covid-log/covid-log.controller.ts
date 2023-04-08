@@ -6,7 +6,7 @@ import { CovidLogService } from './covid-log.service';
 export class CovidLogController {
   constructor(private readonly covidLogService: CovidLogService) {}
 
-  @Get('/totals-series-by-region')
+  @Get('/time-series')
   @ApiQuery({
     name: 'regionType',
     type: 'string',
@@ -15,7 +15,7 @@ export class CovidLogController {
   @ApiQuery({ name: 'regions', type: 'string', isArray: true })
   @ApiQuery({ name: 'field', type: 'string' })
   async getSeries(@Query() query) {
-    return this.covidLogService.getSeries({
+    return this.covidLogService.getTimeSeries({
       regionType: query.regionType,
       regions: query.regions.split(','),
       field: query.field,

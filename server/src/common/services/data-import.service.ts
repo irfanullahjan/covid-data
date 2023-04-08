@@ -24,7 +24,6 @@ export class DataImportService implements OnModuleInit {
     __dirname,
     '..',
     '..',
-    'data',
     'owid-covid-data.csv',
   );
 
@@ -34,7 +33,6 @@ export class DataImportService implements OnModuleInit {
     }
     console.log('DataImportService: Importing data...');
     await this.importCovidLog();
-    console.log('DataImportService: All done!');
   }
 
   private async importCovidLog() {
@@ -66,11 +64,12 @@ export class DataImportService implements OnModuleInit {
       if (Math.random() < 0.1) {
         await new Promise((resolve) => setTimeout(resolve, this.IMPORT_DELAY));
       }
-      process.stdout.write(`\r${recordsCount} records imported`);
+      process.stdout.write(
+        `\r${recordsCount} records parsed and database update queued`,
+      );
     }
-    console.log('\nDataImportService: CovidLog import complete');
     console.log(
-      `There might be a delay before all the data is available in the API`,
+      '\nDataImportService: CovidLog parse complete, please keep the app running to ensure all records are imported',
     );
   }
 

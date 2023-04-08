@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Col, Container, Row, Spinner } from "reactstrap";
 import {
   CartesianGrid,
   Legend,
@@ -12,15 +11,21 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import { Loading } from "~/common/components/Loading";
 import { useFetch } from "~/common/hooks/useFetch";
 
 export function Chart() {
   const [fetcher, loading] = useFetch();
   const [data, setData] = useState();
 
+  const regions = ["North America", "South America", "Europe"];
+  const colors = ["red", "blue", "green", "orange", "purple", "yellow", "pink"];
+
   useEffect(() => {
     fetcher(
-      "/covid-log/totals-series-by-region?regionType=location&regions=Pakistan&field=total_cases"
+      `/covid-log/time-series?regionType=location&regions=${regions.join(
+        ","
+      )}&field=total_cases_per_million`
     )
       .then((res) => res.json())
       .then(setData)
@@ -31,12 +36,12 @@ export function Chart() {
   }, []);
 
   if (loading) {
-    return <Spinner />;
+    return <Loading />;
   }
   return (
     <LineChart
-      width={500}
-      height={300}
+      width={1200}
+      height={800}
       data={data}
       margin={{
         top: 5,
@@ -47,15 +52,28 @@ export function Chart() {
     >
       <CartesianGrid strokeDasharray="3 3" />
       <XAxis dataKey="date" />
-      <YAxis />
+      <YAxis
+        tickFormatter={(tick) => {
+          if (tick >= 1000000) {
+            return `${tick / 1000000}M`;
+          }
+          if (tick >= 1000) {
+            return `${tick / 1000}K`;
+          }
+          return tick;
+        }}
+      />
       <Tooltip />
       <Legend />
-      <Line
-        type="monotone"
-        dataKey="Pakistan"
-        stroke="#8884d8"
-        activeDot={{ r: 8 }}
-      />
+      {regions.map((region, i) => (
+        <Line
+          key={region}
+          type="monotone"
+          dataKey={region}
+          stroke={colors[i % colors.length]}
+          activeDot={{ r: 8 }}
+        />
+      ))}
     </LineChart>
   );
 }

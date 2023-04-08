@@ -11,7 +11,7 @@ export class CovidLogService {
     private readonly covidLogRepository: Repository<CovidLog>,
   ) {}
 
-  async getSeries({
+  async getTimeSeries({
     regionType,
     regions,
     field,
