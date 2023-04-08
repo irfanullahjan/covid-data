@@ -3,12 +3,12 @@ import { fetchServerSide } from "~/common/utils/fetchServerSide";
 import { Chart } from "./Chart";
 
 export default async function Home() {
-  const user = await fetchServerSide("/auth/current-user");
+  const fields = await fetchServerSide("/covid-log/fields");
   return (
     <Container>
       <Row>
         <Col>
-          <Chart />
+          <Chart fields={fields} />
         </Col>
       </Row>
     </Container>

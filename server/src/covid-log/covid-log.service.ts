@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { fields } from '../common/fieds';
 import { CreateCovidLogDto } from './dto/create-covid-log.dto';
 import { CovidLog } from './entities/covid-log.entity';
 
@@ -22,6 +23,10 @@ export class CovidLogService {
   }) {
     try {
       const dateSelect = "TO_CHAR(date, 'YYYY-MM-DD') AS date";
+      const aggregationFunction = fields[field]?.aggregate;
+      if (!aggregationFunction) {
+        throw new BadRequestException(`Invalid field ${field}`);
+      }
       let qb = this.covidLogRepository
         .createQueryBuilder()
         .select([dateSelect, regionType, field])
@@ -56,6 +61,13 @@ export class CovidLogService {
         throw e;
       }
     }
+  }
+
+  async getFields() {
+    return Object.keys(fields).map((key) => ({
+      name: fields[key].name,
+      value: key,
+    }));
   }
 
   create(createCovidLogDto: CreateCovidLogDto) {

@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CovidLogService } from './covid-log.service';
 
 @Controller('covid-log')
@@ -20,5 +20,10 @@ export class CovidLogController {
       regions: query.regions.split(','),
       field: query.field,
     });
+  }
+
+  @Get('/fields')
+  async getFields() {
+    return this.covidLogService.getFields();
   }
 }

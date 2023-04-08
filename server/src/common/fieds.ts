@@ -1,4 +1,4 @@
-export const seriesColumns = {
+export const fields = {
   total_cases: {
     name: 'Total Cases',
     aggregate: 'SUM',
