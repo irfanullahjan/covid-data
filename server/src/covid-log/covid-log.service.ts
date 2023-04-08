@@ -33,6 +33,12 @@ export class CovidLogService {
   }
 
   removeAll() {
-    return this.covidLogRepository.clear();
+    return this.covidLogRepository.clear().then(async (...args) => {
+      console.log('CovidLogService: removeAll', ...args);
+      await this.covidLogRepository.manager.query(
+        'ALTER SEQUENCE covid_log_id_seq RESTART WITH 1',
+      );
+      return args;
+    });
   }
 }

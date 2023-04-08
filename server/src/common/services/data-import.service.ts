@@ -12,22 +12,16 @@ export class DataImportService implements OnModuleInit {
     private readonly covidLogService: CovidLogService,
   ) {}
 
-  private readonly importEnabled = false;
-
   async onModuleInit() {
-    if (!this.importEnabled) {
-      console.log('DataImportService: Import disabled');
-      return;
-    }
     console.log('DataImportService: Importing data...');
     await this.importCovidLog();
     console.log('DataImportService: All done!');
   }
 
   private async importCovidLog() {
-    console.log('DataImportService: Importing CovidLog...');
     await this.covidLogService.removeAll();
     console.log('DataImportService: Existing CovidLog records removed');
+    console.log('DataImportService: Importing CovidLog...');
     const columns = await this.getCsvColumns(this.owidCovidDataCsv);
     const reader = readline.createInterface({
       input: fs.createReadStream(this.owidCovidDataCsv),
@@ -49,11 +43,14 @@ export class DataImportService implements OnModuleInit {
         }
         covidLog[columns[i]] = value;
       }
-      await this.covidLogService.create(new CovidLog(covidLog));
+      this.covidLogService.create(new CovidLog(covidLog));
       recordsCount++;
+      if (Math.random() < 0.1) {
+        // increase the setTimeout value to slow down the import, in case you run into memory issues
+        await new Promise((resolve) => setTimeout(resolve, 1));
+      }
       process.stdout.write(`\r${recordsCount} records imported`);
     }
-    console.log(columns);
   }
 
   private readonly owidCovidDataCsv = path.join(
