@@ -1,0 +1,23 @@
+version: "3.8"
+
+x-vars: &defaults-development
+  NODE_ENV: development
+  DB_HOST: db
+  DB_PORT: 5432
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+
+services:
+  db:
+    image: postgres:15.1
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: covid
+
+volumes:
+  db_data:

@@ -1,0 +1,21 @@
+@import "~bootstrap/scss/bootstrap";
+
+@import "~bootstrap-icons/font/bootstrap-icons.css";
+
+$placeholder-opacity-max: 0.6;
+$placeholder-opacity-min: 0.1;
+
+// Removing horizontal padding from Navbar
+nav.navbar {
+  > div.container-fluid {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+a {
+  text-decoration: none;
+  &:hover {
+    text-decoration: none;
+  }
+}
