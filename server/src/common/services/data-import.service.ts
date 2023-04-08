@@ -12,6 +12,12 @@ export class DataImportService implements OnModuleInit {
     private readonly covidLogService: CovidLogService,
   ) {}
 
+  // to disable the import, set this to true
+  private readonly IMPORT_DISABLED = true;
+
+  // increase the setTimeout value to slow down the import, in case you run into memory issues
+  private readonly IMPORT_DELAY = 1;
+
   private readonly CSV_SEPARATOR = ',';
 
   private readonly CSV_FILE = path.join(
@@ -23,6 +29,9 @@ export class DataImportService implements OnModuleInit {
   );
 
   async onModuleInit() {
+    if (this.IMPORT_DISABLED) {
+      return;
+    }
     console.log('DataImportService: Importing data...');
     await this.importCovidLog();
     console.log('DataImportService: All done!');
@@ -55,11 +64,14 @@ export class DataImportService implements OnModuleInit {
       );
       recordsCount++;
       if (Math.random() < 0.1) {
-        // increase the setTimeout value to slow down the import, in case you run into memory issues
-        await new Promise((resolve) => setTimeout(resolve, 1));
+        await new Promise((resolve) => setTimeout(resolve, this.IMPORT_DELAY));
       }
       process.stdout.write(`\r${recordsCount} records imported`);
     }
+    console.log('\nDataImportService: CovidLog import complete');
+    console.log(
+      `There might be a delay before all the data is available in the API`,
+    );
   }
 
   private async getCsvColumns(csvFilePath, separator = ',') {
@@ -75,6 +87,7 @@ export class DataImportService implements OnModuleInit {
     const covidLog: Partial<CovidLog> = {};
     for (const [i, cell] of row.entries()) {
       let sanitizedCell = cell;
+      // first 3 columns are strings, the rest are floats
       if (i > 2 && isNaN(parseFloat(cell))) {
         sanitizedCell = null;
       } else {

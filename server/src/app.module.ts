@@ -39,10 +39,6 @@ import { UserModule } from './user/user.module';
   providers: [
     AppService,
     {
-      provide: 'APP_GUARD',
-      useClass: JwtAuthGuard,
-    },
-    {
       provide: 'APP_INTERCEPTOR',
       useClass: ClassSerializerInterceptor,
     },
