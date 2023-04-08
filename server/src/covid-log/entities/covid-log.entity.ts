@@ -6,7 +6,7 @@ export class CovidLog extends BaseEntity {
   @Column({ type: 'varchar', length: 64 })
   iso_code: string;
 
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 128, nullable: true })
   continent: string;
 
   @Column({ type: 'varchar', length: 128 })
