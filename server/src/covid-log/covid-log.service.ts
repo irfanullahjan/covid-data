@@ -1,8 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateCovidLogDto } from './dto/create-covid-log.dto';
-import { UpdateCovidLogDto } from './dto/update-covid-log.dto';
 import { CovidLog } from './entities/covid-log.entity';
 
 @Injectable()
@@ -28,30 +27,37 @@ export class CovidLogService {
         .select([dateSelect, regionType, field])
         .where(`${regionType} IN (:...regions)`, { regions })
         .orderBy(`date, ${regionType}`);
-      let data;
       if (regionType === 'continent') {
         qb = qb
           .select([dateSelect, 'continent', `SUM(${field}) AS ${field}`])
           .groupBy('date, continent');
-        data = await qb.getRawMany();
-      } else {
-        data = await qb.getRawMany();
       }
-      return data.reduce((acc, curr) => {
-        if (!acc[curr.date]) {
-          acc[curr.date] = {};
-        }
-        acc[curr.date][curr[regionType]] = curr[field];
-        return acc;
-      }, {});
+      const data = await qb.getRawMany();
+      const datesMap = {};
+      data.forEach((row) => {
+        datesMap[row.date] = true;
+      });
+      const datesArr = Object.keys(datesMap);
+      return datesArr.map((date) => {
+        const row = {
+          date,
+        };
+        data.forEach((dataRow) => {
+          if (dataRow.date === date) {
+            row[dataRow[regionType]] = dataRow[field];
+          }
+        });
+        return row;
+      });
     } catch (e) {
       if (e.driverError) {
-        throw new BadRequestException("Invalid query parameters");
+        throw new BadRequestException('Query failed');
       } else {
         throw e;
       }
     }
   }
+
   create(createCovidLogDto: CreateCovidLogDto) {
     return this.covidLogRepository.save(new CovidLog(createCovidLogDto));
   }
