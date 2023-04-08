@@ -31,4 +31,8 @@ export class CovidLogService {
   remove(id: number) {
     return `This action removes a #${id} covidLog`;
   }
+
+  removeAll() {
+    return this.covidLogRepository.clear();
+  }
 }
