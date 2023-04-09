@@ -2,17 +2,17 @@ import { FieldArray } from "formik";
 import { Button, Col, Row } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
-export type FieldType = {
+export type FieldOption = {
   name: string;
   value: string;
 };
 
 type Props = {
-  fields: FieldType[];
+  fieldOptions: FieldOption[];
   comparison?: boolean;
 };
 
-export function FieldsFilter({ fields, comparison }: Props) {
+export function FieldsFilter({ fieldOptions, comparison }: Props) {
   return (
     <Row>
       <FieldArray name="fields">
@@ -25,7 +25,7 @@ export function FieldsFilter({ fields, comparison }: Props) {
                   label="Field"
                   type="select"
                 >
-                  {fields.map((field) => (
+                  {fieldOptions.map((field) => (
                     <option key={field.value} value={field.value}>
                       {field.name}
                     </option>

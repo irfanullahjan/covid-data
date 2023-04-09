@@ -2,14 +2,12 @@ import { fetchServerSide } from "~/common/utils/fetchServerSide";
 import { HomeContent } from "./components/HomeContent";
 
 export default async function Home() {
-  const fields = await fetchServerSide("/covid-log/fields");
-  const countries = await fetchServerSide("/covid-log/countries");
-  const continents = await fetchServerSide("/covid-log/continents");
+  const fieldOptions = await fetchServerSide("/covid-log/field-options");
+  const locationOptions = await fetchServerSide("/covid-log/location-options");
   return (
     <HomeContent
-      fields={fields}
-      countries={countries}
-      continents={continents}
+      fieldOptions={fieldOptions}
+      locationOptions={locationOptions}
     />
   );
 }

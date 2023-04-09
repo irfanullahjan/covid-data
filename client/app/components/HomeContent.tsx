@@ -1,41 +1,34 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import { use, useEffect, useState } from "react";
+import _ from "lodash";
+import { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
 import { Chart } from "./Chart";
-import { FieldType } from "./FieldsFilter";
+import { FieldOption } from "./FieldsFilter";
 import { Filters } from "./Filters";
+import { LocationOption } from "./LocationsFilter";
 
 type Props = {
-  fields: FieldType[];
-  countries: string[];
-  continents: string[];
+  fieldOptions: FieldOption[];
+  locationOptions: LocationOption[];
 };
 
-export function HomeContent({ fields, countries, continents }: Props) {
+export function HomeContent({ fieldOptions, locationOptions }: Props) {
   const [data, setData] = useState<any[] | null>();
   const [fetcher, loading] = useFetch();
 
   const formik = useFormik<{
-    baseLine: "region" | "field";
+    baseLine: "location" | "field";
     fields: string[];
-    regions: {
-      name: string;
-      type: string;
-    }[];
+    locations: string[];
   }>({
     initialValues: {
-      baseLine: "region",
+      baseLine: "location",
       fields: ["new_cases"],
-      regions: [
-        {
-          name: "Pakistan",
-          type: "location",
-        },
-      ],
+      locations: ["PAK"],
     },
     onSubmit: () => {},
   });
@@ -45,27 +38,43 @@ export function HomeContent({ fields, countries, continents }: Props) {
   }, [formik.values.baseLine]);
 
   useEffect(() => {
-    if (formik.values.baseLine === "region") {
-      formik.setFieldValue("regions", formik.values.regions.slice(0, 1));
+    if (formik.values.baseLine === "location") {
+      formik.setFieldValue("locations", formik.values.locations.slice(0, 1));
     } else {
       formik.setFieldValue("fields", formik.values.fields.slice(0, 1));
     }
   }, [formik.values.baseLine]);
 
   useEffect(() => {
-    let url = "/covid-log/time-series/single-region?";
-    if (formik.values.baseLine === "region") {
-      const currentRegion = formik.values.regions[0];
-      url += `regionType=${currentRegion.type}&region=${currentRegion.name}`;
+    let url = "/covid-log/time-series?";
+    if (formik.values.baseLine === "location") {
+      const currentLocation = formik.values.locations[0];
+      url += `locations=${currentLocation}`;
       url += `&fields=${formik.values.fields.join(",")}`;
     } else {
-      const currentRegion = formik.values.regions[0];
-      url += `regionType=${currentRegion.type}&region=${currentRegion.name}`;
+      const currentLocation = formik.values.locations[0];
+      url += `locations=${currentLocation}`;
       url += `&fields=${formik.values.fields.join(",")}`;
     }
     fetcher(url)
       .then((res) => res.json())
-      .then(setData);
+      .then((json) => {
+        if (formik.values.baseLine === "location") {
+          const datesArr = _.uniq(json.map((d: any) => d.date));
+          const transformedData = datesArr.map((date) => {
+            const row: any = { date };
+            json.forEach((d: any) => {
+              if (d.date === date) {
+                formik.values.fields.forEach((f) => {
+                  row[f] = d[f];
+                });
+              }
+            });
+            return row;
+          });
+          setData(transformedData);
+        }
+      });
   }, [formik.values]);
 
   return (
@@ -76,16 +85,15 @@ export function HomeContent({ fields, countries, continents }: Props) {
           <FormikProvider value={formik}>
             <Filters
               baseLine={formik.values.baseLine}
-              fields={fields}
-              countries={countries}
-              continents={continents}
+              fieldOptions={fieldOptions}
+              locationOptions={locationOptions}
             />
           </FormikProvider>
           <Chart
             dataKeys={
-              formik.values.baseLine === "region"
+              formik.values.baseLine === "location"
                 ? formik.values.fields
-                : formik.values.regions.map((region) => region.name)
+                : formik.values.locations
             }
             data={data}
           />

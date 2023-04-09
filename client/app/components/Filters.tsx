@@ -1,41 +1,35 @@
 "use client";
 
 import { FormikInput } from "~/common/components/FormikInput";
-import { FieldType, FieldsFilter } from "./FieldsFilter";
-import { RegionsFilter } from "./RegionsFilter";
+import { FieldOption, FieldsFilter } from "./FieldsFilter";
+import { LocationOption, LocationsFilter } from "./LocationsFilter";
 
 type Props = {
-  baseLine?: "region" | "field";
-  fields: FieldType[];
-  continents: string[];
-  countries: string[];
+  baseLine?: "location" | "field";
+  fieldOptions: FieldOption[];
+  locationOptions: LocationOption[];
 };
 
 export function Filters({
-  baseLine = "region",
-  fields,
-  continents,
-  countries,
+  baseLine = "location",
+  fieldOptions,
+  locationOptions,
 }: Props) {
   return (
     <>
-      <FormikInput name="baseLine" label="Base Line" type="select">
-        <option value="region">Region</option>
+      <FormikInput name="baseLine" label="Baseline" type="select">
+        <option value="location">Location</option>
         <option value="field">Field</option>
       </FormikInput>
-      {baseLine === "region" ? (
+      {baseLine === "location" ? (
         <>
-          <RegionsFilter
-            countries={countries}
-            continents={continents}
-            comparison
-          />
-          <FieldsFilter fields={fields} />
+          <LocationsFilter locationOptions={locationOptions} comparison />
+          <FieldsFilter fieldOptions={fieldOptions} />
         </>
       ) : (
         <>
-          <FieldsFilter fields={fields} comparison />
-          <RegionsFilter countries={countries} continents={continents} />
+          <FieldsFilter fieldOptions={fieldOptions} comparison />
+          <LocationsFilter locationOptions={locationOptions} />
         </>
       )}
     </>

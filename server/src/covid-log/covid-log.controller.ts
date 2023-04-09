@@ -6,35 +6,54 @@ import { CovidLogService } from './covid-log.service';
 export class CovidLogController {
   constructor(private readonly covidLogService: CovidLogService) {}
 
-  @Get('/time-series/single-region')
+  @Get('/time-series')
   @ApiQuery({
-    name: 'regionType',
+    name: 'locations',
     type: 'string',
-    enum: ['continent', 'location'],
+    required: true,
+    isArray: true,
+    description:
+      'Comma separated list of ISO 3166-1 alpha-3 codes of the locations with some custom codes for continents. Please use the locations endpoint to get the list of available locations.',
   })
-  @ApiQuery({ name: 'region', type: 'string' })
-  @ApiQuery({ name: 'fields', type: 'string' })
+  @ApiQuery({
+    name: 'fields',
+    type: 'string',
+    required: true,
+    isArray: true,
+    description:
+      'Comma separated list of fields to return. Please use the fields endpoint to get the list of available fields.',
+  })
+  @ApiQuery({
+    name: 'from',
+    type: 'string',
+    required: false,
+    description:
+      'The date from which to return the data. The date should be in ISO 8601 format (YYYY-MM-DD).',
+  })
+  @ApiQuery({
+    name: 'to',
+    type: 'string',
+    required: false,
+    description:
+      'The date to which to return the data. The date should be in ISO 8601 format (YYYY-MM-DD).',
+  })
   async getSeries(@Query() query) {
-    const { regionType, region, fields } = query;
-    return this.covidLogService.getTimeSeriesSingleRegion(
-      regionType,
-      region,
+    const { locations = '', fields = '', from, to } = query;
+    return this.covidLogService.getSeries(
+      locations.split(','),
       fields.split(','),
+      from,
+      to,
     );
   }
 
-  @Get('/fields')
+  @Get('/location-options')
+  async getContinents() {
+    return this.covidLogService.getLocations();
+  }
+
+  @Get('/field-options')
   async getFields() {
     return this.covidLogService.getFields();
-  }
-
-  @Get('/continents')
-  async getContinents() {
-    return this.covidLogService.getContinents();
-  }
-
-  @Get('/countries')
-  async getCountries() {
-    return this.covidLogService.getCountries();
   }
 }
