@@ -1,5 +1,5 @@
 import { FieldArray } from "formik";
-import { Col, Row } from "reactstrap";
+import { Button, Col, Row } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
 export type FieldType = {
@@ -13,8 +13,6 @@ type Props = {
 };
 
 export function FieldsFilter({ fields, comparison }: Props) {
-  const fieldInputs = comparison ? Array.from({ length: 2 }) : [null];
-
   return (
     <Row>
       <FieldArray name="fields">
@@ -24,7 +22,7 @@ export function FieldsFilter({ fields, comparison }: Props) {
               <Col key={index}>
                 <FormikInput
                   name={`fields[${index}]`}
-                  label="Field Name"
+                  label="Field"
                   type="select"
                 >
                   {fields.map((field) => (
@@ -35,6 +33,23 @@ export function FieldsFilter({ fields, comparison }: Props) {
                 </FormikInput>
               </Col>
             ))}
+            {!comparison && (
+              <Col md={1} className="d-flex align-items-center">
+                <Button onClick={() => arrayHelpers.push("total_cases")}>
+                  <i className="bi bi-plus-circle"></i>
+                </Button>
+                <Button
+                  onClick={() =>
+                    arrayHelpers.remove(
+                      arrayHelpers.form.values.fields.length - 1
+                    )
+                  }
+                  disabled={arrayHelpers.form.values.fields.length === 1}
+                >
+                  <i className="bi bi-dash-circle"></i>
+                </Button>
+              </Col>
+            )}
           </>
         )}
       </FieldArray>

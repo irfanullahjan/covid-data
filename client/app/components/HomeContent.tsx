@@ -1,7 +1,7 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
@@ -29,7 +29,7 @@ export function HomeContent({ fields, countries, continents }: Props) {
   }>({
     initialValues: {
       baseLine: "region",
-      fields: ["total_cases", "total_deaths"],
+      fields: ["new_cases"],
       regions: [
         {
           name: "Pakistan",
@@ -42,6 +42,14 @@ export function HomeContent({ fields, countries, continents }: Props) {
 
   useEffect(() => {
     setData(null);
+  }, [formik.values.baseLine]);
+
+  useEffect(() => {
+    if (formik.values.baseLine === "region") {
+      formik.setFieldValue("regions", formik.values.regions.slice(0, 1));
+    } else {
+      formik.setFieldValue("fields", formik.values.fields.slice(0, 1));
+    }
   }, [formik.values.baseLine]);
 
   useEffect(() => {
