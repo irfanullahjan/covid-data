@@ -1,7 +1,6 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import _ from "lodash";
 import { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
@@ -27,17 +26,14 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
   }>({
     initialValues: {
       baseLine: "location",
-      fields: ["new_cases"],
-      locations: ["PAK"],
+      fields: ["new_cases_smoothed_per_million", "new_deaths_smoothed"],
+      locations: ["CAN"],
     },
     onSubmit: () => {},
   });
 
   useEffect(() => {
     setData(null);
-  }, [formik.values.baseLine]);
-
-  useEffect(() => {
     if (formik.values.baseLine === "location") {
       formik.setFieldValue("locations", formik.values.locations.slice(0, 1));
     } else {
@@ -46,34 +42,33 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
   }, [formik.values.baseLine]);
 
   useEffect(() => {
-    let url = "/covid-log/time-series?";
-    if (formik.values.baseLine === "location") {
-      const currentLocation = formik.values.locations[0];
-      url += `locations=${currentLocation}`;
-      url += `&fields=${formik.values.fields.join(",")}`;
-    } else {
-      const currentLocation = formik.values.locations[0];
-      url += `locations=${currentLocation}`;
-      url += `&fields=${formik.values.fields.join(",")}`;
-    }
+    const locations = formik.values.locations;
+    let url = "/covid-log/time-series";
+    url += `?locations=${locations.join(",")}`;
+    url += `&fields=${formik.values.fields.join(",")}`;
     fetcher(url)
       .then((res) => res.json())
-      .then((json) => {
-        if (formik.values.baseLine === "location") {
-          const datesArr = _.uniq(json.map((d: any) => d.date));
-          const transformedData = datesArr.map((date) => {
-            const row: any = { date };
-            json.forEach((d: any) => {
-              if (d.date === date) {
-                formik.values.fields.forEach((f) => {
-                  row[f] = d[f];
-                });
+      .then((responseArray) => {
+        const transformedData = responseArray.reduce((acc: any, cur: any) => {
+          if (!acc[cur.date]) {
+            acc[cur.date] = {
+              date: cur.date,
+            };
+          }
+          if (formik.values.baseLine === "location") {
+            formik.values.fields.forEach((field) => {
+              acc[cur.date][field] = cur[field];
+            });
+          } else {
+            formik.values.locations.forEach((location) => {
+              if (cur.iso_code === location) {
+                acc[cur.date][location] = cur[formik.values.fields[0]];
               }
             });
-            return row;
-          });
-          setData(transformedData);
-        }
+          }
+          return acc;
+        }, {});
+        setData(Object.values(transformedData));
       });
   }, [formik.values]);
 

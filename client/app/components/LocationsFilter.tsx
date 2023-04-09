@@ -1,5 +1,5 @@
 import { FieldArray } from "formik";
-import { Col, Row } from "reactstrap";
+import { Button, Col, Row } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
 export type LocationOption = {
@@ -49,6 +49,23 @@ export function LocationsFilter({ locationOptions, comparison }: Props) {
                 </FormikInput>
               </Col>
             ))}
+            {!comparison && (
+              <Col md={1} className="d-flex align-items-center">
+                <Button onClick={() => arrayHelpers.push("CAN")}>
+                  <i className="bi bi-plus-circle"></i>
+                </Button>
+                <Button
+                  onClick={() =>
+                    arrayHelpers.remove(
+                      arrayHelpers.form.values.locations.length - 1
+                    )
+                  }
+                  disabled={arrayHelpers.form.values.locations.length === 1}
+                >
+                  <i className="bi bi-dash-circle"></i>
+                </Button>
+              </Col>
+            )}
           </>
         )}
       </FieldArray>

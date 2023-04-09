@@ -110,7 +110,7 @@ export class CovidLogService {
       throw new BadRequestException('At least one location is required');
     }
     locations.forEach((location) => {
-      if (location.length !== 3) {
+      if (location.length < 3) {
         throw new BadRequestException(`Invalid location: ${location}`);
       }
     });
