@@ -7,9 +7,16 @@ import { RegionsFilter } from "./RegionsFilter";
 type Props = {
   baseLine?: "region" | "field";
   fields: FieldType[];
+  continents: string[];
+  countries: string[];
 };
 
-export function Filters({ baseLine = "region", fields }: Props) {
+export function Filters({
+  baseLine = "region",
+  fields,
+  continents,
+  countries,
+}: Props) {
   return (
     <>
       <FormikInput name="baseLine" label="Base Line" type="select">
@@ -18,13 +25,17 @@ export function Filters({ baseLine = "region", fields }: Props) {
       </FormikInput>
       {baseLine === "region" ? (
         <>
+          <RegionsFilter
+            countries={countries}
+            continents={continents}
+            comparison
+          />
           <FieldsFilter fields={fields} />
-          <RegionsFilter regions={[]} comparison />
         </>
       ) : (
         <>
-          <RegionsFilter regions={[]} />
           <FieldsFilter fields={fields} comparison />
+          <RegionsFilter countries={countries} continents={continents} />
         </>
       )}
     </>

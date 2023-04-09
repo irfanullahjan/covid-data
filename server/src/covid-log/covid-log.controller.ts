@@ -6,21 +6,35 @@ import { CovidLogService } from './covid-log.service';
 export class CovidLogController {
   constructor(private readonly covidLogService: CovidLogService) {}
 
-  @Get('/time-series')
+  @Get('/time-series/single-region')
   @ApiQuery({
     name: 'regionType',
     type: 'string',
     enum: ['continent', 'location'],
   })
   @ApiQuery({ name: 'region', type: 'string' })
-  @ApiQuery({ name: 'field', type: 'string' })
+  @ApiQuery({ name: 'fields', type: 'string' })
   async getSeries(@Query() query) {
-    const { regionType, region, field } = query;
-    return this.covidLogService.getTimeSeries(regionType, region, field);
+    const { regionType, region, fields } = query;
+    return this.covidLogService.getTimeSeriesSingleRegion(
+      regionType,
+      region,
+      fields.split(','),
+    );
   }
 
   @Get('/fields')
   async getFields() {
     return this.covidLogService.getFields();
+  }
+
+  @Get('/continents')
+  async getContinents() {
+    return this.covidLogService.getContinents();
+  }
+
+  @Get('/countries')
+  async getCountries() {
+    return this.covidLogService.getCountries();
   }
 }

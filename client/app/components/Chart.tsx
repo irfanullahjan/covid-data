@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import {
   CartesianGrid,
   Legend,
@@ -10,29 +9,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
-import { useFetch } from "~/common/hooks/useFetch";
 
 type Props = {
-  region: string;
-  field: string;
+  data: any;
+  dataKeys: string[];
 };
 
-export function Chart({ region, field }: Props) {
-  const [fetcher, loading] = useFetch();
-  const [data, setData] = useState();
-
-  useEffect(() => {
-    fetcher(
-      `/covid-log/time-series?regionType=continent&region=${region}&field=${field}`
-    )
-      .then((res) => res.json())
-      .then(setData);
-  }, [region, field]);
-
+export function Chart({ data, dataKeys }: Props) {
   return (
     <div>
-      {loading && <LoadingFullScreen />}
       <LineChart
         width={900}
         height={600}
@@ -59,12 +44,15 @@ export function Chart({ region, field }: Props) {
         />
         <Tooltip />
         <Legend />
-        <Line
-          type="monotone"
-          dataKey={region}
-          stroke="#8884d8"
-          activeDot={{ r: 8 }}
-        />
+        {dataKeys.map((key) => (
+          <Line
+            key={key}
+            type="monotone"
+            dataKey={key}
+            stroke="#8884d8"
+            activeDot={{ r: 8 }}
+          />
+        ))}
       </LineChart>
     </div>
   );

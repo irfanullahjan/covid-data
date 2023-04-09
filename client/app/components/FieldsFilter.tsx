@@ -1,3 +1,4 @@
+import { FieldArray } from "formik";
 import { Col, Row } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
@@ -16,17 +17,27 @@ export function FieldsFilter({ fields, comparison }: Props) {
 
   return (
     <Row>
-      {fieldInputs.map((_, i) => (
-        <Col key={i}>
-          <FormikInput name={`fields[${i}]`} label="Fields" type="select">
-            {fields.map((field) => (
-              <option key={field.value} value={field.value}>
-                {field.name}
-              </option>
+      <FieldArray name="fields">
+        {(arrayHelpers) => (
+          <>
+            {arrayHelpers.form.values.fields.map((_: any, index: number) => (
+              <Col key={index}>
+                <FormikInput
+                  name={`fields[${index}]`}
+                  label="Field Name"
+                  type="select"
+                >
+                  {fields.map((field) => (
+                    <option key={field.value} value={field.value}>
+                      {field.name}
+                    </option>
+                  ))}
+                </FormikInput>
+              </Col>
             ))}
-          </FormikInput>
-        </Col>
-      ))}
+          </>
+        )}
+      </FieldArray>
     </Row>
   );
 }
