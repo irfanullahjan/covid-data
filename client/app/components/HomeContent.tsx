@@ -1,10 +1,11 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
+import { formatParamArrayToString } from "~/common/utils/urlUtils";
 import { Chart } from "./Chart";
 import { FieldOption } from "./FieldsFilter";
 import { Filters } from "./Filters";
@@ -16,13 +17,15 @@ type Props = {
 };
 
 export function HomeContent({ fieldOptions, locationOptions }: Props) {
-  const [data, setData] = useState<any[] | null>();
+  const [data, setData] = useState([]);
   const [fetcher, loading] = useFetch();
 
   const formik = useFormik<{
     baseLine: "location" | "field";
     fields: string[];
     locations: string[];
+    from?: string;
+    to?: string;
   }>({
     initialValues: {
       baseLine: "location",
@@ -33,7 +36,6 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
   });
 
   useEffect(() => {
-    setData(null);
     if (formik.values.baseLine === "location") {
       formik.setFieldValue("locations", formik.values.locations.slice(0, 1));
     } else {
@@ -41,23 +43,34 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
     }
   }, [formik.values.baseLine]);
 
-  const urlRef = useRef<string>();
+  const urlRef = useRef("");
 
   useEffect(() => {
     const locations = formik.values.locations;
     const fields = formik.values.fields;
     let url = "/covid-log/time-series?";
-    url += locations.map((l) => `locations[]=${l}`).join("&");
+    url += formatParamArrayToString("locations", locations);
     url += "&";
-    url += fields.map((f) => `fields[]=${f}`).join("&");
+    url += formatParamArrayToString("fields", fields);
+    if (formik.values.from) {
+      url += `&from=${formik.values.from}`;
+    }
+    if (formik.values.to) {
+      url += `&to=${formik.values.to}`;
+    }
     if (urlRef.current === url) {
-      return; // to prevent unnecessary fetch
+      return;
     }
     urlRef.current = url;
     fetcher(url)
       .then((res) => res.json())
-      .then((responseArray) => {
-        const transformedData = responseArray.reduce((acc: any, cur: any) => {
+      .then(setData);
+  }, [formik.values]);
+
+  const tranformedData = useMemo(
+    () =>
+      Object.values(
+        data.reduce((acc: any, cur: any) => {
           if (!acc[cur.date]) {
             acc[cur.date] = {
               date: cur.date,
@@ -75,33 +88,29 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
             });
           }
           return acc;
-        }, {});
-        setData(Object.values(transformedData));
-      });
-  }, [formik.values]);
+        }, {})
+      ),
+    [data, formik.values]
+  );
 
   return (
-    <Container>
-      <Row>
-        <Col>
-          {loading && <LoadingFullScreen />}
-          <FormikProvider value={formik}>
-            <Filters
-              baseLine={formik.values.baseLine}
-              fieldOptions={fieldOptions}
-              locationOptions={locationOptions}
-            />
-          </FormikProvider>
-          <Chart
-            dataKeys={
-              formik.values.baseLine === "location"
-                ? formik.values.fields
-                : formik.values.locations
-            }
-            data={data}
-          />
-        </Col>
-      </Row>
-    </Container>
+    <>
+      {loading && <LoadingFullScreen />}
+      <FormikProvider value={formik}>
+        <Filters
+          baseLine={formik.values.baseLine}
+          fieldOptions={fieldOptions}
+          locationOptions={locationOptions}
+        />
+      </FormikProvider>
+      <Chart
+        dataKeys={
+          formik.values.baseLine === "location"
+            ? formik.values.fields
+            : formik.values.locations
+        }
+        data={tranformedData}
+      />
+    </>
   );
 }

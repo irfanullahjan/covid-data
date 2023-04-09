@@ -1,5 +1,6 @@
 "use client";
 
+import { Col, Row } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 import { FieldOption, FieldsFilter } from "./FieldsFilter";
 import { LocationOption, LocationsFilter } from "./LocationsFilter";
@@ -17,21 +18,33 @@ export function Filters({
 }: Props) {
   return (
     <>
-      <FormikInput name="baseLine" label="Baseline" type="select">
-        <option value="location">Location</option>
-        <option value="field">Field</option>
-      </FormikInput>
-      {baseLine === "location" ? (
-        <>
-          <LocationsFilter locationOptions={locationOptions} comparison />
-          <FieldsFilter fieldOptions={fieldOptions} />
-        </>
-      ) : (
-        <>
-          <FieldsFilter fieldOptions={fieldOptions} comparison />
-          <LocationsFilter locationOptions={locationOptions} />
-        </>
-      )}
+      <Row>
+        <Col>
+          <FormikInput name="baseLine" label="Baseline" type="select">
+            <option value="location">Location</option>
+            <option value="field">Field</option>
+          </FormikInput>
+        </Col>
+        <Col>
+          <FormikInput name="from" label="From" type="date" />
+        </Col>
+        <Col>
+          <FormikInput name="to" label="To" type="date" />
+        </Col>
+      </Row>
+      <Row>
+        {baseLine === "location" ? (
+          <>
+            <LocationsFilter locationOptions={locationOptions} comparison />
+            <FieldsFilter fieldOptions={fieldOptions} />
+          </>
+        ) : (
+          <>
+            <FieldsFilter fieldOptions={fieldOptions} comparison />
+            <LocationsFilter locationOptions={locationOptions} />
+          </>
+        )}
+      </Row>
     </>
   );
 }

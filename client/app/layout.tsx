@@ -18,7 +18,9 @@ export default async function RootLayout({ children }: any) {
       <body>
         <Navbar user={user} />
         <Alerts />
-        <Main>{children}</Main>
+        <Main>
+          <div className="pt-4">{children}</div>
+        </Main>
       </body>
     </html>
   );

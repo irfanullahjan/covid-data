@@ -14,8 +14,7 @@ export function FormikInput(props: Props) {
 
   const invalid = meta.touched && meta.error;
   return (
-    <FormGroup>
-      {label ? <Label>{label}</Label> : null}
+    <FormGroup floating>
       <Input
         type={type ?? "text"}
         invalid={!!invalid}
@@ -24,6 +23,7 @@ export function FormikInput(props: Props) {
         {...field}
         {...otherProps}
       />
+      {label ? <Label>{label}</Label> : null}
       {invalid && <FormFeedback>{meta.error}</FormFeedback>}
     </FormGroup>
   );
