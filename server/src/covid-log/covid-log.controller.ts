@@ -8,7 +8,7 @@ export class CovidLogController {
 
   @Get('/time-series')
   @ApiQuery({
-    name: 'locations',
+    name: 'locations[]',
     type: 'string',
     required: true,
     isArray: true,
@@ -16,7 +16,7 @@ export class CovidLogController {
       'Comma separated list of ISO 3166-1 alpha-3 codes of the locations with some custom codes for continents. Please use the locations endpoint to get the list of available locations.',
   })
   @ApiQuery({
-    name: 'fields',
+    name: 'fields[]',
     type: 'string',
     required: true,
     isArray: true,
@@ -38,17 +38,12 @@ export class CovidLogController {
       'The date to which to return the data. The date should be in ISO 8601 format (YYYY-MM-DD).',
   })
   async getSeries(@Query() query) {
-    const { locations = '', fields = '', from, to } = query;
-    return this.covidLogService.getSeries(
-      locations.split(','),
-      fields.split(','),
-      from,
-      to,
-    );
+    const { locations = [], fields = [], from, to } = query;
+    return this.covidLogService.getSeries(locations, fields, from, to);
   }
 
   @Get('/location-options')
-  async getContinents() {
+  async getLocations() {
     return this.covidLogService.getLocations();
   }
 

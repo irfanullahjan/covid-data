@@ -1,7 +1,7 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
@@ -41,11 +41,19 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
     }
   }, [formik.values.baseLine]);
 
+  const urlRef = useRef<string>();
+
   useEffect(() => {
     const locations = formik.values.locations;
-    let url = "/covid-log/time-series";
-    url += `?locations=${locations.join(",")}`;
-    url += `&fields=${formik.values.fields.join(",")}`;
+    const fields = formik.values.fields;
+    let url = "/covid-log/time-series?";
+    url += locations.map((l) => `locations[]=${l}`).join("&");
+    url += "&";
+    url += fields.map((f) => `fields[]=${f}`).join("&");
+    if (urlRef.current === url) {
+      return; // to prevent unnecessary fetch
+    }
+    urlRef.current = url;
     fetcher(url)
       .then((res) => res.json())
       .then((responseArray) => {

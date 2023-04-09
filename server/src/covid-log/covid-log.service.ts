@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 import { fieldsConfig } from '../common/fields';
 import { CreateCovidLogDto } from './dto/create-covid-log.dto';
+import { FieldOptionDto } from './dto/field-option.dto';
+import { LocationOptionDto } from './dto/location-option.dto';
 import { CovidLog } from './entities/covid-log.entity';
 
 @Injectable()
@@ -56,14 +58,13 @@ export class CovidLogService {
     }
   }
 
-  async getLocations() {
+  async getLocations(): Promise<LocationOptionDto[]> {
     const locations = await this.covidLogRepository
       .createQueryBuilder()
       .select(['iso_code', 'continent', 'location'])
       .distinct(true)
-      .orderBy('continent', 'ASC')
-      .addOrderBy('location', 'ASC')
-      .getRawMany();
+      .orderBy('location', 'ASC')
+      .getRawMany<{ iso_code: string; continent: string; location: string }>();
     return locations.map((location) => {
       const isIncomeGroup = !!INCOME_GROUP_ISO[location.iso_code];
       // empty continent means the location itself is a continent
@@ -76,7 +77,7 @@ export class CovidLogService {
     });
   }
 
-  async getFields() {
+  async getFields(): Promise<FieldOptionDto[]> {
     return Object.keys(fieldsConfig).map((key) => ({
       name: fieldsConfig[key].name,
       value: key,
@@ -96,7 +97,7 @@ export class CovidLogService {
 
   private validateFields(fields: Array<keyof CovidLog>) {
     if (fields.length === 0) {
-      throw new BadRequestException('At least one field is required');
+      throw new BadRequestException('At least one fields[] is required');
     }
     fields.forEach((field) => {
       if (!fieldsConfig[field]) {
@@ -107,7 +108,7 @@ export class CovidLogService {
 
   private validateLocations(locations: string[]) {
     if (locations.length === 0) {
-      throw new BadRequestException('At least one location is required');
+      throw new BadRequestException('At least one locations[] is required');
     }
     locations.forEach((location) => {
       if (location.length < 3) {
@@ -122,6 +123,11 @@ export class CovidLogService {
     }
     if (to && !this.isValidDate(to)) {
       throw new BadRequestException(`Invalid to date: ${to}`);
+    }
+    if (from && to && new Date(from) > new Date(to)) {
+      throw new BadRequestException(
+        `From date must be before to date: ${from} - ${to}`,
+      );
     }
   }
 
