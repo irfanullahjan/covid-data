@@ -1,6 +1,6 @@
-import { FieldArray, useFormikContext } from "formik";
-import { useEffect } from "react";
-import { Button, Col, Row } from "reactstrap";
+import { FieldArray } from "formik";
+import { useTransition } from "react";
+import { Button, Col } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
 export type FieldOption = {
@@ -14,6 +14,7 @@ type Props = {
 };
 
 export function FieldsFilter({ fieldOptions, comparison }: Props) {
+  const [isPending, startTransition] = useTransition();
   return (
     <FieldArray name="fields">
       {(arrayHelpers) => (
@@ -24,6 +25,7 @@ export function FieldsFilter({ fieldOptions, comparison }: Props) {
                 name={`fields[${index}]`}
                 label="Field"
                 type="select"
+                style={{ backgroundColor: "powderblue" }}
               >
                 {fieldOptions.map((field) => (
                   <option key={field.value} value={field.value}>
@@ -34,19 +36,37 @@ export function FieldsFilter({ fieldOptions, comparison }: Props) {
             </Col>
           ))}
           {!comparison && (
-            <Col sm={12} md={4} lg={3} className="mb-3">
-              <Button onClick={() => arrayHelpers.push("total_cases")}>
-                <i className="bi bi-plus-circle"></i>
-              </Button>{" "}
+            <Col
+              sm={12}
+              md={4}
+              lg={3}
+              className="mb-3 d-flex align-items-center gap-3"
+            >
               <Button
+                color="primary"
+                disabled={isPending}
                 onClick={() =>
-                  arrayHelpers.remove(
-                    arrayHelpers.form.values.fields.length - 1
-                  )
+                  startTransition(() => {
+                    arrayHelpers.push("total_cases");
+                  })
                 }
-                disabled={arrayHelpers.form.values.fields.length === 1}
               >
-                <i className="bi bi-dash-circle"></i>
+                Add
+              </Button>
+              <Button
+                color="danger"
+                disabled={
+                  arrayHelpers.form.values.fields.length === 1 || isPending
+                }
+                onClick={() =>
+                  startTransition(() => {
+                    arrayHelpers.remove(
+                      arrayHelpers.form.values.fields.length - 1
+                    );
+                  })
+                }
+              >
+                Remove
               </Button>
             </Col>
           )}

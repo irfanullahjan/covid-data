@@ -2,7 +2,6 @@
 
 import { FormikProvider, useFormik } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Col, Container, Row } from "reactstrap";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
 import { formatParamArrayToString } from "~/common/utils/urlUtils";
@@ -104,12 +103,15 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
         />
       </FormikProvider>
       <Chart
+        baseLine={formik.values.baseLine}
         dataKeys={
           formik.values.baseLine === "location"
             ? formik.values.fields
             : formik.values.locations
         }
         data={tranformedData}
+        fieldOptions={fieldOptions}
+        locationOptions={locationOptions}
       />
     </>
   );

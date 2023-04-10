@@ -10,27 +10,36 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { intToColor } from "~/common/utils/numberUtils";
+import { formatToThousandsMillions } from "~/common/utils/numberUtils";
+import { FieldOption } from "./FieldsFilter";
+import { LocationOption } from "./LocationsFilter";
 
 type Props = {
   data: any;
   dataKeys: string[];
+  fieldOptions: FieldOption[];
+  locationOptions: LocationOption[];
+  baseLine: "location" | "field";
 };
 
-export function Chart({ data, dataKeys }: Props) {
+export function Chart({
+  data,
+  dataKeys,
+  fieldOptions,
+  locationOptions,
+  baseLine,
+}: Props) {
   const colors = [
-    "#8884d8", // blue
-    "#82ca9d", // green
-    "#ffc658", // yellow
-    "#ff7300", // orange
-    "#ff0000", // red
-    "#000000", // black
-    "#0000ff", // blue
-    "#00ff00", // green
-    "#ffff00", // yellow
-    "#ff7f00", // orange
-    "#ff0000", // red
-    "#000000", // black
+    "#ff6f61", // red
+    "#ffa600", // orange
+    "#f48a1d", // goldenrod
+    "#0077be", // blue
+    "#55b9f3", // sky blue
+    "#00b32c", // green
+    "#9b4f96", // purple
+    "#ed225d", // pink
+    "#32384d", // dark gray
+    "#a7a9ac", // light gray
   ];
   return (
     <div>
@@ -48,18 +57,11 @@ export function Chart({ data, dataKeys }: Props) {
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
-          <YAxis
-            tickFormatter={(tick) => {
-              if (tick >= 1000000) {
-                return `${tick / 1000000}M`;
-              }
-              if (tick >= 1000) {
-                return `${tick / 1000}K`;
-              }
-              return tick;
-            }}
+          <YAxis tickFormatter={formatToThousandsMillions} />
+          <Tooltip
+            // @ts-ignore
+            formatter={(value: number) => formatToThousandsMillions(value)}
           />
-          <Tooltip />
           <Legend />
           {dataKeys.map((key, i) => (
             <Line
@@ -69,6 +71,11 @@ export function Chart({ data, dataKeys }: Props) {
               stroke={colors[i % colors.length]}
               activeDot={{ r: 8 }}
               dot={false}
+              name={
+                baseLine === "location"
+                  ? fieldOptions.find((f) => f.value === key)?.name
+                  : locationOptions.find((l) => l.iso_code === key)?.location
+              }
             />
           ))}
         </LineChart>

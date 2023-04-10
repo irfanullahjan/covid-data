@@ -1,5 +1,6 @@
 import { FieldArray } from "formik";
-import { Button, Col, Row } from "reactstrap";
+import { useTransition } from "react";
+import { Button, Col } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
 export type LocationOption = {
@@ -16,6 +17,7 @@ type Props = {
 };
 
 export function LocationsFilter({ locationOptions, comparison }: Props) {
+  const [isPending, startTransition] = useTransition();
   return (
     <FieldArray name="locations">
       {(arrayHelpers) => (
@@ -26,6 +28,7 @@ export function LocationsFilter({ locationOptions, comparison }: Props) {
                 name={`locations[${index}]`}
                 label="Location"
                 type="select"
+                style={{ backgroundColor: "blanchedalmond" }}
               >
                 <OptionGroup
                   label="Continents"
@@ -47,19 +50,37 @@ export function LocationsFilter({ locationOptions, comparison }: Props) {
             </Col>
           ))}
           {!comparison && (
-            <Col sm={12} md={4} lg={3} className="mb-3">
-              <Button onClick={() => arrayHelpers.push("CAN")}>
-                <i className="bi bi-plus-circle"></i>
+            <Col
+              sm={12}
+              md={4}
+              lg={3}
+              className="mb-3 d-flex align-items-center gap-3"
+            >
+              <Button
+                color="primary"
+                disabled={isPending}
+                onClick={() =>
+                  startTransition(() => {
+                    arrayHelpers.push("CAN");
+                  })
+                }
+              >
+                Add
               </Button>{" "}
               <Button
+                color="danger"
+                disabled={
+                  arrayHelpers.form.values.locations.length === 1 || isPending
+                }
                 onClick={() =>
-                  arrayHelpers.remove(
-                    arrayHelpers.form.values.locations.length - 1
+                  startTransition(() =>
+                    arrayHelpers.remove(
+                      arrayHelpers.form.values.locations.length - 1
+                    )
                   )
                 }
-                disabled={arrayHelpers.form.values.locations.length === 1}
               >
-                <i className="bi bi-dash-circle"></i>
+                Remove
               </Button>
             </Col>
           )}

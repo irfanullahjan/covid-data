@@ -19,20 +19,37 @@ export function Filters({
   return (
     <>
       <Row>
-        <Col>
-          <FormikInput name="baseLine" label="Baseline" type="select">
+        <Col sm={12} md={4} lg={3}>
+          <FormikInput
+            name="from"
+            label="From"
+            type="date"
+            style={{ backgroundColor: "lightgray" }}
+          />
+        </Col>
+        <Col sm={12} md={4} lg={3}>
+          <FormikInput
+            name="to"
+            label="To"
+            type="date"
+            style={{ backgroundColor: "lightgray" }}
+          />
+        </Col>
+        <Col sm={12} md={4} lg={3}>
+          <FormikInput
+            name="baseLine"
+            label="Baseline"
+            type="select"
+            style={
+              baseLine === "location"
+                ? { backgroundColor: "blanchedalmond" }
+                : { backgroundColor: "powderblue" }
+            }
+          >
             <option value="location">Location</option>
             <option value="field">Field</option>
           </FormikInput>
         </Col>
-        <Col>
-          <FormikInput name="from" label="From" type="date" />
-        </Col>
-        <Col>
-          <FormikInput name="to" label="To" type="date" />
-        </Col>
-      </Row>
-      <Row>
         {baseLine === "location" ? (
           <>
             <LocationsFilter locationOptions={locationOptions} comparison />
