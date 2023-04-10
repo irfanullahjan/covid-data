@@ -4,7 +4,6 @@ import { FormikProvider, useFormik } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
-import { fetchClientSide } from "~/common/utils/fetchClientSide";
 import { formatParamArrayToString } from "~/common/utils/urlUtils";
 import { Chart } from "./Chart";
 import { FieldOption } from "./FieldsFilter";
@@ -48,7 +47,6 @@ export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
         baseLine: "location",
         fields: ["new_cases_smoothed_per_million", "new_deaths_smoothed"],
         locations: ["CAN"],
-        remoember: !!user?.id,
       }
     );
   };
