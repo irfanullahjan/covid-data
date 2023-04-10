@@ -42,6 +42,8 @@ export class DataImportService implements OnModuleInit {
       this.CSV_FILE,
       Config.DATA_IMPORT_CSV_SEPARATOR,
     );
+    const totalRecords = await this.countLines(this.CSV_FILE);
+    console.log(`${totalRecords} records found in csv file`);
     const reader = readline.createInterface({
       input: fs.createReadStream(this.CSV_FILE),
     });
@@ -81,6 +83,17 @@ export class DataImportService implements OnModuleInit {
     for await (const line of reader) {
       return line.split(separator);
     }
+  }
+
+  private async countLines(filePath: string, skipHeader = true) {
+    const reader = readline.createInterface({
+      input: fs.createReadStream(filePath),
+    });
+    let count = 0;
+    for await (const line of reader) {
+      count++;
+    }
+    return skipHeader ? count - 1 : count;
   }
 
   private getCovidLogObj(row: string[], columns: string[]): Partial<CovidLog> {
