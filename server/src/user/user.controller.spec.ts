@@ -6,10 +6,14 @@ describe('UserController', () => {
   let controller: UserController;
 
   beforeEach(async () => {
+    const mockUserService = {};
     const module: TestingModule = await Test.createTestingModule({
       controllers: [UserController],
       providers: [UserService],
-    }).compile();
+    })
+      .overrideProvider(UserService)
+      .useValue(mockUserService)
+      .compile();
 
     controller = module.get<UserController>(UserController);
   });

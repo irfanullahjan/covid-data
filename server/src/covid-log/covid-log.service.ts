@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { INCOME_GROUP_ISO } from 'src/common/constants';
 import {
   Between,
   FindOneOptions,
@@ -9,6 +8,7 @@ import {
   MoreThanOrEqual,
   Repository,
 } from 'typeorm';
+import { INCOME_GROUP_ISO } from '../common/constants';
 import { fieldsConfig } from '../common/fields';
 import { CreateCovidLogDto } from './dto/create-covid-log.dto';
 import { FieldOptionDto } from './dto/field-option.dto';
