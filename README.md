@@ -2,7 +2,7 @@
 
 This is a data visualization app that allows to compare various regions and covid19 metrics.
 
-The source data is provided by Our World in Data: https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv. The data is processed when the app starts and stored in the database. This maybe enabled/disabled in the `server/src/config.ts` file.
+The source data is provided by Our World in Data: https://github.com/owid/covid-19-data/blob/master/public/data/owid-covid-data.csv. The data is processed when the app starts and stored in the database. The import process may be configured in `server/src/config.ts` file. If you run into issues with the import process, you can try adjusting the `DATA_IMPORT_BATCH_SIZE`. Import may also be disabled by setting `DATA_IMPORT_DISABLED` to `true`.
 
 This app is built with React (Next.js), Nest.js, and PostgreSQL.
 

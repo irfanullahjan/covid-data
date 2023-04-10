@@ -12,12 +12,6 @@ export class DataImportService implements OnModuleInit {
     @Inject(CovidLogService)
     private readonly covidLogService: CovidLogService,
   ) {}
-  // increase the setTimeout value to slow down the import, in case you run into memory issues
-  private readonly IMPORT_DELAY = 1;
-
-  private readonly BATCH_SIZE = 200;
-
-  private readonly CSV_SEPARATOR = ',';
 
   private readonly CSV_FILE = path.join(
     __dirname,
@@ -31,7 +25,13 @@ export class DataImportService implements OnModuleInit {
       return;
     }
     console.log('DataImportService: Importing data...');
-    await this.importCovidLog();
+    try {
+      await this.importCovidLog();
+    } catch (e) {
+      console.error('DataImportService: Import failed');
+      console.error('Try adjusting import parameters in src/config.ts');
+      throw e;
+    }
   }
 
   private async importCovidLog() {
@@ -40,7 +40,7 @@ export class DataImportService implements OnModuleInit {
     console.log('DataImportService: Importing CovidLog...');
     const columns: string[] = await this.getCsvColumns(
       this.CSV_FILE,
-      this.CSV_SEPARATOR,
+      Config.DATA_IMPORT_CSV_SEPARATOR,
     );
     const reader = readline.createInterface({
       input: fs.createReadStream(this.CSV_FILE),
@@ -52,24 +52,21 @@ export class DataImportService implements OnModuleInit {
         recordsCount++;
         continue;
       }
-      const row: string[] = line.split(this.CSV_SEPARATOR);
+      const row: string[] = line.split(Config.DATA_IMPORT_CSV_SEPARATOR);
       if (row.length !== columns.length) {
         console.log('DataImportService: Skipping invalid row: ');
         continue;
       }
-      if (batch.length === this.BATCH_SIZE) {
+      if (batch.length === Config.DATA_IMPORT_BATCH_SIZE) {
         await this.covidLogService.createMany(batch);
-        batch = [];
+        batch = [this.getCovidLogObj(row, columns)];
       } else {
         batch.push(this.getCovidLogObj(row, columns));
-      }
-      recordsCount++;
-      if (Math.random() < 0.1) {
-        await new Promise((resolve) => setTimeout(resolve, this.IMPORT_DELAY));
       }
       process.stdout.write(
         `\r${recordsCount} covid records parsed and saved to database`,
       );
+      recordsCount++;
     }
     if (batch.length > 0) {
       await this.covidLogService.createMany(batch);
