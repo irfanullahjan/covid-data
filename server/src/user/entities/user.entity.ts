@@ -11,6 +11,9 @@ export class User extends BaseEntity {
   @Column({ type: 'text' })
   password: string;
 
+  @Column({ type: 'text', nullable: true })
+  savedFilters?: string;
+
   constructor(partial: Partial<User>) {
     super();
     Object.assign(this, partial);

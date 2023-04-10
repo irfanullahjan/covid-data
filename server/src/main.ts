@@ -9,7 +9,8 @@ import { DelayMiddleware } from './common/middlewares/delay.middleware';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const { httpAdapter } = app.get(HttpAdapterHost);
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('Nest bootstrap: Using delay middleware');
     app.use(new DelayMiddleware().use);
   }
   app.use(cookieParser());

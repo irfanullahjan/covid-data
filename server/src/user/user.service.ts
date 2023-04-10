@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { hash } from 'bcrypt';
 import { Repository } from 'typeorm';
+import { getUserFromRequest } from '../common/auth/jwt-utils';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -18,10 +19,6 @@ export class UserService {
     return this.userRepository.save(new User(createUserDto));
   }
 
-  findAll() {
-    return `This action returns all user`;
-  }
-
   findOne(email: string) {
     return this.userRepository.findOne({
       where: {
@@ -30,11 +27,11 @@ export class UserService {
     });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  update(id: number, updateUserDto: UpdateUserDto, req) {
+    const currentUser = getUserFromRequest(req);
+    if (currentUser.sub !== id) {
+      throw new Error('Unauthorized');
+    }
+    return this.userRepository.update(id, updateUserDto);
   }
 }

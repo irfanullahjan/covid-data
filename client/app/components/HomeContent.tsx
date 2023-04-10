@@ -4,6 +4,7 @@ import { FormikProvider, useFormik } from "formik";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
+import { fetchClientSide } from "~/common/utils/fetchClientSide";
 import { formatParamArrayToString } from "~/common/utils/urlUtils";
 import { Chart } from "./Chart";
 import { FieldOption } from "./FieldsFilter";
@@ -13,11 +14,44 @@ import { LocationOption } from "./LocationsFilter";
 type Props = {
   fieldOptions: FieldOption[];
   locationOptions: LocationOption[];
+  user: any;
 };
 
-export function HomeContent({ fieldOptions, locationOptions }: Props) {
+const sanitizeSavedFilter = (savedFiltersString: string) => {
+  let savedFilters;
+  try {
+    savedFilters = JSON.parse(savedFiltersString);
+  } catch (e) {
+    console.error(e);
+    return;
+  }
+  if (
+    !savedFilters ||
+    ["location", "field"].indexOf(savedFilters.baseLine) === -1 ||
+    !Array.isArray(savedFilters.fields) ||
+    !Array.isArray(savedFilters.locations) ||
+    (savedFilters.from && isNaN(Date.parse(savedFilters.from))) ||
+    (savedFilters.to && isNaN(Date.parse(savedFilters.to)))
+  ) {
+    return;
+  }
+  return savedFilters;
+};
+
+export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
   const [data, setData] = useState([]);
   const [fetcher, loading] = useFetch();
+
+  const getInitialValues = () => {
+    return (
+      sanitizeSavedFilter(user?.savedFilters) ?? {
+        baseLine: "location",
+        fields: ["new_cases_smoothed_per_million", "new_deaths_smoothed"],
+        locations: ["CAN"],
+        remoember: !!user?.id,
+      }
+    );
+  };
 
   const formik = useFormik<{
     baseLine: "location" | "field";
@@ -25,14 +59,15 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
     locations: string[];
     from?: string;
     to?: string;
+    remember?: boolean;
   }>({
-    initialValues: {
-      baseLine: "location",
-      fields: ["new_cases_smoothed_per_million", "new_deaths_smoothed"],
-      locations: ["CAN"],
-    },
+    initialValues: getInitialValues(),
     onSubmit: () => {},
   });
+
+  useEffect(() => {
+    formik.setValues(getInitialValues());
+  }, [user]);
 
   useEffect(() => {
     if (formik.values.baseLine === "location") {
@@ -100,6 +135,7 @@ export function HomeContent({ fieldOptions, locationOptions }: Props) {
           baseLine={formik.values.baseLine}
           fieldOptions={fieldOptions}
           locationOptions={locationOptions}
+          user={user}
         />
       </FormikProvider>
       <Chart

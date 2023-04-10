@@ -8,7 +8,13 @@ describe('CovidLogService', () => {
   let service: CovidLogService;
 
   const mockCovidLogRepository = {
-    find: jest.fn(),
+    find: jest.fn().mockImplementation(() => [{}]),
+    createQueryBuilder: jest.fn().mockImplementation(() => ({
+      select: jest.fn().mockReturnThis(),
+      distinct: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn().mockImplementation(() => [{}]),
+    })),
   };
 
   beforeEach(async () => {
@@ -116,6 +122,45 @@ describe('CovidLogService', () => {
       await expect(
         service.getSeries(query.locations, query.fields, query.to, query.from),
       ).rejects.toThrow();
+    });
+
+    it('should allow from date to be equal to to date', async () => {
+      await service.getSeries(
+        query.locations,
+        query.fields,
+        query.from,
+        query.from,
+      );
+      expect(mockCovidLogRepository.find).toHaveBeenCalledWith(
+        getQueryObject(query.locations, query.fields, query.from, query.from),
+      );
+    });
+
+    it('should return an array of objects', async () => {
+      const result = await service.getSeries(
+        query.locations,
+        query.fields,
+        query.from,
+        query.to,
+      );
+      expect(result).toBeInstanceOf(Array);
+      expect(result[0]).toBeInstanceOf(Object);
+    });
+  });
+
+  describe('getLocations', () => {
+    it('should return an array of objects', async () => {
+      const result = await service.getLocations();
+      expect(result).toBeInstanceOf(Array);
+      expect(result[0]).toBeInstanceOf(Object);
+    });
+  });
+
+  describe('getFields', () => {
+    it('should return an array of objects', async () => {
+      const result = await service.getFields();
+      expect(result).toBeInstanceOf(Array);
+      expect(result[0]).toBeInstanceOf(Object);
     });
   });
 });

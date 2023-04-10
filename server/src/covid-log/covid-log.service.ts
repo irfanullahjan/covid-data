@@ -28,7 +28,6 @@ export class CovidLogService {
     from?: string,
     to?: string,
   ) {
-    console.log('getSeries', locations, fields, from, to);
     this.validateLocations(locations);
     this.validateFields(fields);
     this.validateDates(from, to);
