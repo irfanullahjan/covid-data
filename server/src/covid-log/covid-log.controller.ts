@@ -1,5 +1,6 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Header, Query } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
+import { Config } from '../config';
 import { CovidLogService } from './covid-log.service';
 
 @Controller('covid-log')
@@ -7,6 +8,7 @@ export class CovidLogController {
   constructor(private readonly covidLogService: CovidLogService) {}
 
   @Get('/time-series')
+  @Header('Cache-Control', `public, max-age=${Config.MAX_AGE}`)
   @ApiQuery({
     name: 'locations[]',
     type: 'string',
@@ -43,11 +45,13 @@ export class CovidLogController {
   }
 
   @Get('/location-options')
+  @Header('Cache-Control', 'public, max-age=86400')
   async getLocations() {
     return this.covidLogService.getLocations();
   }
 
   @Get('/field-options')
+  @Header('Cache-Control', `public, max-age=${Config.MAX_AGE}`)
   async getFields() {
     return this.covidLogService.getFields();
   }

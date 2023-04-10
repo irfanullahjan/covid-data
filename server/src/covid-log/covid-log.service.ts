@@ -28,6 +28,7 @@ export class CovidLogService {
     from?: string,
     to?: string,
   ) {
+    console.log('getSeries', locations, fields, from, to);
     this.validateLocations(locations);
     this.validateFields(fields);
     this.validateDates(from, to);
@@ -58,14 +59,19 @@ export class CovidLogService {
     }
   }
 
+  private locationsCache: LocationOptionDto[];
+
   async getLocations(): Promise<LocationOptionDto[]> {
+    if (this.locationsCache) {
+      return this.locationsCache;
+    }
     const locations = await this.covidLogRepository
       .createQueryBuilder()
       .select(['iso_code', 'continent', 'location'])
       .distinct(true)
       .orderBy('location', 'ASC')
       .getRawMany<{ iso_code: string; continent: string; location: string }>();
-    return locations.map((location) => {
+    this.locationsCache = locations.map((location) => {
       const isIncomeGroup = !!INCOME_GROUP_ISO[location.iso_code];
       // empty continent means the location itself is a continent
       const isContinent = !isIncomeGroup && !location.continent;
@@ -75,13 +81,20 @@ export class CovidLogService {
         isContinent,
       };
     });
+    return this.locationsCache;
   }
 
+  private fieldsCache: FieldOptionDto[];
+
   async getFields(): Promise<FieldOptionDto[]> {
-    return Object.keys(fieldsConfig).map((key) => ({
+    if (this.fieldsCache) {
+      return this.fieldsCache;
+    }
+    this.fieldsCache = Object.keys(fieldsConfig).map((key) => ({
       name: fieldsConfig[key].name,
       value: key,
     }));
+    return this.fieldsCache;
   }
 
   create(createCovidLogDto: CreateCovidLogDto) {
