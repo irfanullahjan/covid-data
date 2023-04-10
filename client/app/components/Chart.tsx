@@ -31,11 +31,11 @@ export function Chart({
 }: Props) {
   const colors = [
     "#ff6f61", // red
+    "#00b32c", // green
+    "#0077be", // blue
     "#ffa600", // orange
     "#f48a1d", // goldenrod
-    "#0077be", // blue
     "#55b9f3", // sky blue
-    "#00b32c", // green
     "#9b4f96", // purple
     "#ed225d", // pink
     "#32384d", // dark gray

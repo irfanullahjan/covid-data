@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import { Config } from '../../config';
 import { CovidLogService } from '../../covid-log/covid-log.service';
 import { CovidLog } from '../../covid-log/entities/covid-log.entity';
 
@@ -11,10 +12,6 @@ export class DataImportService implements OnModuleInit {
     @Inject(CovidLogService)
     private readonly covidLogService: CovidLogService,
   ) {}
-
-  // to disable the import, set this to true
-  private readonly IMPORT_DISABLED = true;
-
   // increase the setTimeout value to slow down the import, in case you run into memory issues
   private readonly IMPORT_DELAY = 1;
 
@@ -28,7 +25,7 @@ export class DataImportService implements OnModuleInit {
   );
 
   async onModuleInit() {
-    if (this.IMPORT_DISABLED) {
+    if (Config.DATA_IMPORT_DISABLED) {
       return;
     }
     console.log('DataImportService: Importing data...');

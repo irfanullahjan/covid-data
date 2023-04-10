@@ -20,6 +20,7 @@ export function FormikInput(props: Props) {
         invalid={!!invalid}
         value={value ?? ""}
         checked={type === "checkbox" ? value ?? false : undefined}
+        placeholder={label}
         {...field}
         {...otherProps}
       />
