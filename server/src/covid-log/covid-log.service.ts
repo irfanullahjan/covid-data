@@ -96,8 +96,10 @@ export class CovidLogService {
     return this.fieldsCache;
   }
 
-  create(createCovidLogDto: CreateCovidLogDto) {
-    return this.covidLogRepository.save(new CovidLog(createCovidLogDto));
+  createMany(createCovidLogDtos: CreateCovidLogDto[]) {
+    return this.covidLogRepository.save(
+      this.covidLogRepository.create(createCovidLogDtos),
+    );
   }
 
   async removeAll() {

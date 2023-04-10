@@ -130,7 +130,6 @@ export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
       {loading && <LoadingFullScreen />}
       <FormikProvider value={formik}>
         <Filters
-          baseLine={formik.values.baseLine}
           fieldOptions={fieldOptions}
           locationOptions={locationOptions}
           user={user}

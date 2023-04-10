@@ -15,6 +15,8 @@ export class DataImportService implements OnModuleInit {
   // increase the setTimeout value to slow down the import, in case you run into memory issues
   private readonly IMPORT_DELAY = 1;
 
+  private readonly BATCH_SIZE = 200;
+
   private readonly CSV_SEPARATOR = ',';
 
   private readonly CSV_FILE = path.join(
@@ -44,6 +46,7 @@ export class DataImportService implements OnModuleInit {
       input: fs.createReadStream(this.CSV_FILE),
     });
     let recordsCount = 0;
+    let batch = [];
     for await (const line of reader) {
       if (recordsCount === 0) {
         recordsCount++;
@@ -54,20 +57,24 @@ export class DataImportService implements OnModuleInit {
         console.log('DataImportService: Skipping invalid row: ');
         continue;
       }
-      this.covidLogService.create(
-        new CovidLog(this.getCovidLogObj(row, columns)),
-      );
+      if (batch.length === this.BATCH_SIZE) {
+        await this.covidLogService.createMany(batch);
+        batch = [];
+      } else {
+        batch.push(this.getCovidLogObj(row, columns));
+      }
       recordsCount++;
       if (Math.random() < 0.1) {
         await new Promise((resolve) => setTimeout(resolve, this.IMPORT_DELAY));
       }
       process.stdout.write(
-        `\r${recordsCount} records parsed and database update queued`,
+        `\r${recordsCount} covid records parsed and saved to database`,
       );
     }
-    console.log(
-      '\nDataImportService: CovidLog parse complete, please keep the app running to ensure all records are imported',
-    );
+    if (batch.length > 0) {
+      await this.covidLogService.createMany(batch);
+    }
+    console.log('\nDataImportService: CovidLog import completed.');
   }
 
   private async getCsvColumns(csvFilePath, separator = ',') {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormikContext } from "formik";
+import { useField, useFormikContext } from "formik";
 import { useRouter } from "next/navigation";
 import { Button, Col, Row, Spinner } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
@@ -9,22 +9,17 @@ import { FieldOption, FieldsFilter } from "./FieldsFilter";
 import { LocationOption, LocationsFilter } from "./LocationsFilter";
 
 type Props = {
-  baseLine?: "location" | "field";
   fieldOptions: FieldOption[];
   locationOptions: LocationOption[];
   user: any;
 };
 
-export function Filters({
-  baseLine = "location",
-  fieldOptions,
-  locationOptions,
-  user,
-}: Props) {
+export function Filters({ fieldOptions, locationOptions, user }: Props) {
   const [saveFilters, saving] = useFetch();
   const [deleteFilters, deleting] = useFetch();
   const formik = useFormikContext<{ remember: boolean }>();
   const router = useRouter();
+  const [{ value: baseLine }] = useField("baseLine");
   return (
     <>
       <Row>
