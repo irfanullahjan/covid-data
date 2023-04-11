@@ -1,5 +1,4 @@
 import { FieldArray } from "formik";
-import { useTransition } from "react";
 import { Button, Col } from "reactstrap";
 import { FormikInput } from "~/common/components/FormikInput";
 
@@ -14,7 +13,6 @@ type Props = {
 };
 
 export function FieldsFilter({ fieldOptions, comparison }: Props) {
-  const [isPending, startTransition] = useTransition();
   return (
     <FieldArray name="fields">
       {(arrayHelpers) => (
@@ -44,26 +42,17 @@ export function FieldsFilter({ fieldOptions, comparison }: Props) {
             >
               <Button
                 color="primary"
-                disabled={isPending}
-                onClick={() =>
-                  startTransition(() => {
-                    arrayHelpers.push("total_cases");
-                  })
-                }
+                onClick={() => arrayHelpers.push("total_cases")}
               >
                 Add
               </Button>
               <Button
                 color="danger"
-                disabled={
-                  arrayHelpers.form.values.fields.length === 1 || isPending
-                }
+                disabled={arrayHelpers.form.values.fields.length === 1}
                 onClick={() =>
-                  startTransition(() => {
-                    arrayHelpers.remove(
-                      arrayHelpers.form.values.fields.length - 1
-                    );
-                  })
+                  arrayHelpers.remove(
+                    arrayHelpers.form.values.fields.length - 1
+                  )
                 }
               >
                 Remove
