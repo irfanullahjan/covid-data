@@ -1,10 +1,7 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
-import { useFetch } from "~/common/hooks/useFetch";
-import { formatParamArrayToString } from "~/common/utils/urlUtils";
+import { useDeferredValue, useEffect } from "react";
 import { Chart } from "./Chart";
 import { FieldOption } from "./FieldsFilter";
 import { Filters } from "./Filters";
