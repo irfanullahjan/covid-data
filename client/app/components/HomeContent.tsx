@@ -1,7 +1,7 @@
 "use client";
 
 import { FormikProvider, useFormik } from "formik";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { LoadingFullScreen } from "~/common/components/LoadingFullScreen";
 import { useFetch } from "~/common/hooks/useFetch";
 import { formatParamArrayToString } from "~/common/utils/urlUtils";
@@ -14,6 +14,14 @@ type Props = {
   fieldOptions: FieldOption[];
   locationOptions: LocationOption[];
   user: any;
+};
+
+export type SearchParams = {
+  baseLine: "location" | "field";
+  fields: string[];
+  locations: string[];
+  from?: string;
+  to?: string;
 };
 
 const sanitizeSavedFilter = (savedFiltersString: string) => {
@@ -38,9 +46,6 @@ const sanitizeSavedFilter = (savedFiltersString: string) => {
 };
 
 export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
-  const [data, setData] = useState([]);
-  const [fetcher, loading] = useFetch();
-
   const getInitialValues = () => {
     return (
       sanitizeSavedFilter(user?.savedFilters) ?? {
@@ -51,14 +56,7 @@ export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
     );
   };
 
-  const formik = useFormik<{
-    baseLine: "location" | "field";
-    fields: string[];
-    locations: string[];
-    from?: string;
-    to?: string;
-    remember?: boolean;
-  }>({
+  const formik = useFormik<SearchParams>({
     initialValues: getInitialValues(),
     onSubmit: () => {},
   });
@@ -75,59 +73,10 @@ export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
     }
   }, [formik.values.baseLine]);
 
-  const urlRef = useRef("");
-
-  useEffect(() => {
-    const locations = formik.values.locations;
-    const fields = formik.values.fields;
-    let url = "/covid-log/time-series?";
-    url += formatParamArrayToString("locations", locations);
-    url += "&";
-    url += formatParamArrayToString("fields", fields);
-    if (formik.values.from) {
-      url += `&from=${formik.values.from}`;
-    }
-    if (formik.values.to) {
-      url += `&to=${formik.values.to}`;
-    }
-    if (urlRef.current === url) {
-      return;
-    }
-    urlRef.current = url;
-    fetcher(url)
-      .then((res) => res.json())
-      .then(setData);
-  }, [formik.values]);
-
-  const tranformedData = useMemo(
-    () =>
-      Object.values(
-        data.reduce((acc: any, cur: any) => {
-          if (!acc[cur.date]) {
-            acc[cur.date] = {
-              date: cur.date,
-            };
-          }
-          if (formik.values.baseLine === "location") {
-            formik.values.fields.forEach((field) => {
-              acc[cur.date][field] = cur[field];
-            });
-          } else {
-            formik.values.locations.forEach((location) => {
-              if (cur.iso_code === location) {
-                acc[cur.date][location] = cur[formik.values.fields[0]];
-              }
-            });
-          }
-          return acc;
-        }, {})
-      ),
-    [data, formik.values]
-  );
+  const deferredFormValues = useDeferredValue(formik.values);
 
   return (
     <>
-      {loading && <LoadingFullScreen />}
       <FormikProvider value={formik}>
         <Filters
           fieldOptions={fieldOptions}
@@ -136,13 +85,7 @@ export function HomeContent({ fieldOptions, locationOptions, user }: Props) {
         />
       </FormikProvider>
       <Chart
-        baseLine={formik.values.baseLine}
-        dataKeys={
-          formik.values.baseLine === "location"
-            ? formik.values.fields
-            : formik.values.locations
-        }
-        data={tranformedData}
+        searchParams={deferredFormValues}
         fieldOptions={fieldOptions}
         locationOptions={locationOptions}
       />
